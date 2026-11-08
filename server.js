@@ -1,14 +1,19 @@
-const { PeerServer } = require('peer');
+const express = require('express');
+const { ExpressPeerServer } = require('peer');
+const cors = require('cors');
 
-const PORT = process.env.PORT || 9000;
-const CUSTOM_API_KEY = process.env.PEER_API_KEY || 'SECRET_SIGNBRIDGE_KEY_2026';
+const app = express();
 
-const server = PeerServer({
-  port: PORT,
-  path: '/signbridge',
-  key: CUSTOM_API_KEY,
-  allow_discovery: false,
-  proxied: true
+// This tells your server to allow your Netlify website to talk to it
+app.use(cors());
+
+const server = app.listen(process.env.PORT || 9000, () => {
+  console.log('Server is running!');
 });
 
-console.log(`🔒 Private SignBridge PeerServer active on port ${PORT}`);
+const peerServer = ExpressPeerServer(server, {
+  path: '/',
+  allow_discovery: true
+});
+
+app.use('/', peerServer);
